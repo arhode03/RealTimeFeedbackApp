@@ -11,7 +11,7 @@ struct ChatGPT {
     let apiKey: String
     
     func sendMessage(_ message: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let apiKey = "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" // Replace "YOUR_API_KEY" with your actual API key
+        let apiKey = "sk" // Replace "YOUR_API_KEY" with your actual API key
         let modelName = "gpt-3.5-turbo" // Replace "YOUR_MODEL_NAME" with the desired model name
         
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!

@@ -11,6 +11,7 @@ import SwiftUICharts
 
 
 struct LineChartView: View {
+    
     @State private var savedFiles: [SavedFile] = []
     @State private var selectedFile: SavedFile?
     @State private var isEditing = false
@@ -29,18 +30,17 @@ struct LineChartView: View {
         var gauge3Values: [Double]
         var gauge4Values: [Double]
         var gauge5Values: [Double]
-        // Add other gauge value properties as needed
     }
     
     func loadSavedFiles() {
         do {
             let documentDirectoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let fileURLs = try FileManager.default.contentsOfDirectory(at: documentDirectoryURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-            
             savedFiles = fileURLs.filter { $0.pathExtension == "json" }.map {
                 SavedFile(name: $0.lastPathComponent, fileURL: $0)
             }
-        } catch {
+        } 
+        catch {
             print("Error loading saved files: \(error.localizedDescription)")
         }
     }
@@ -50,7 +50,8 @@ struct LineChartView: View {
             let jsonData = try Data(contentsOf: file.fileURL)
             let decoder = JSONDecoder()
             file.gaugeData = try decoder.decode(GaugeData.self, from: jsonData)
-        } catch {
+        } 
+        catch {
             print("Error loading gauge data for file \(file.name): \(error.localizedDescription)")
         }
     }
@@ -64,7 +65,8 @@ struct LineChartView: View {
         VStack {
             if savedFiles.isEmpty {
                 Text("No saved files found.")
-            } else {
+            } 
+            else {
                 List(savedFiles) { file in
                     HStack {
                         Button(action: {

@@ -8,75 +8,131 @@
 import SwiftUI
 import CoreData
 import AVFoundation
-
+import AVKit
 
 struct GaugeView: View {
     var value: Double
     var label: String
     var range: ClosedRange<Double> // Declare a property `range` of type ClosedRange<Double>.
     @Binding private var slider1Range: ClosedRange<Double> // Declare a private property `slider1Range` of type Binding<ClosedRange<Double>>.
-    @Binding private var slider2Range: ClosedRange<Double> // Declare a private property `slider2Range` of type Binding<ClosedRange<Double>>.
-    @Binding private var slider3Range: ClosedRange<Double> // Declare a private property `slider3Range` of type Binding<ClosedRange<Double>>.
-    @Binding private var slider4Range: ClosedRange<Double> // Declare a private property `slider4Range` of type Binding<ClosedRange<Double>>.
-    @Binding private var slider5Range: ClosedRange<Double> // Declare a private property `slider5Range` of type Binding<ClosedRange<Double>>.
+    @Binding private var slider2Range: ClosedRange<Double>
+    @Binding private var slider3Range: ClosedRange<Double>
+    @Binding private var slider4Range: ClosedRange<Double>
+    @Binding private var slider5Range: ClosedRange<Double>
+    @Binding private var slider1Lower: ClosedRange<Double> // Declare a private property `slider1Lower` of type Binding<ClosedRange<Double>>.
+    @Binding private var slider2Lower: ClosedRange<Double>
+    @Binding private var slider3Lower: ClosedRange<Double>
+    @Binding private var slider4Lower: ClosedRange<Double>
+    @Binding private var slider5Lower: ClosedRange<Double>
     
-    init(value: Double, label: String, range: ClosedRange<Double>, slider1Range: Binding<ClosedRange<Double>>, slider2Range: Binding<ClosedRange<Double>>, slider3Range: Binding<ClosedRange<Double>>, slider4Range: Binding<ClosedRange<Double>>, slider5Range: Binding<ClosedRange<Double>>) {
+    init(value: Double, label: String, range: ClosedRange<Double>, slider1Range: Binding<ClosedRange<Double>>, slider2Range: Binding<ClosedRange<Double>>, slider3Range: Binding<ClosedRange<Double>>, slider4Range: Binding<ClosedRange<Double>>, slider5Range: Binding<ClosedRange<Double>>, slider1Lower: Binding<ClosedRange<Double>>, slider2Lower: Binding<ClosedRange<Double>>, slider3Lower: Binding<ClosedRange<Double>>, slider4Lower: Binding<ClosedRange<Double>>, slider5Lower: Binding<ClosedRange<Double>>) {
         self.value = value // Assign the value parameter to the `value` property.
-        self.label = label // Assign the label parameter to the `label` property.
-        self.range = range // Assign the range parameter to the `range` property.
+        self.label = label
+        self.range = range
         _slider1Range = slider1Range // Assign the slider1Range parameter to the `slider1Range` property.
-        _slider2Range = slider2Range // Assign the slider2Range parameter to the `slider2Range` property.
-        _slider3Range = slider3Range // Assign the slider3Range parameter to the `slider3Range` property.
-        _slider4Range = slider4Range // Assign the slider4Range parameter to the `slider4Range` property.
-        _slider5Range = slider5Range // Assign the slider5Range parameter to the `slider5Range` property.
+        _slider2Range = slider2Range
+        _slider3Range = slider3Range
+        _slider4Range = slider4Range
+        _slider5Range = slider5Range
+        _slider1Lower = slider1Lower
+        _slider2Lower = slider2Lower
+        _slider3Lower = slider3Lower
+        _slider4Lower = slider4Lower
+        _slider5Lower = slider5Lower
     }
     
     var body: some View {
         VStack {
             Text(label)
-                .font(.headline)
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(.orange)
             Gauge(value: value, in: range) { // Create a Gauge view with the `value` and `range` properties.
                 Text(String(format: "%.2f", value)) // Display the formatted value of the `value` property in a text view.
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(.system(size: 18, design: .rounded))
+                    .foregroundColor(.orange)
             }
             .overlay( // Apply an overlay to the Gauge view.
                 GeometryReader { geometry in // Use a GeometryReader to access the view's size and position.
-                    ZStack { // Create a ZStack to overlay multiple shapes.
+                    ZStack {
                         if label == "Current" { // Check if the `label` property is equal to "Current".
                             Path { path in // Create a path for drawing the line.
                                 let x = CGFloat(valueToPercentage(slider1Range.upperBound, range: range)) * geometry.size.width // Calculate the x-coordinate of the line based on the slider range.
-                                path.move(to: CGPoint(x: x, y: 0)) // Move the starting point of the line.
+                                let lineHeight: CGFloat = geometry.size.height / 2  //change the height of the line
+                                path.move(to: CGPoint(x: x, y: lineHeight)) // Move the starting point of the line.
                                 path.addLine(to: CGPoint(x: x, y: geometry.size.height)) // Add a line to the specified point.
                             }
-                            .stroke(Color.red, lineWidth: 2) // Set the stroke color and line width.
-                        } else if label == "X Axis Angle" { // Check if the `label` property is equal to "X Axis Angle".
-                            Path { path in // Create a path for drawing the line.
-                                let x = CGFloat(valueToPercentage(slider2Range.upperBound, range: range)) * geometry.size.width // Calculate the x-coordinate of the line based on the slider range.
-                                path.move(to: CGPoint(x: x, y: 0)) // Move the starting point of the line.
-                                path.addLine(to: CGPoint(x: x, y: geometry.size.height)) // Add a line to the specified point.
+                            .stroke(Color.green, lineWidth: 2) // Set the stroke color and line width.
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider1Lower.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
                             }
-                            .stroke(Color.red, lineWidth: 2) // Set the stroke color and line width.
-                        } else if label == "Y Axis Angle" { // Check if the `label` property is equal to "Y Axis Angle".
-                            Path { path in // Create a path for drawing the line.
-                                let x = CGFloat(valueToPercentage(slider3Range.upperBound, range: range)) * geometry.size.width // Calculate the x-coordinate of the line based on the slider range.
-                                path.move(to: CGPoint(x: x, y: 0)) // Move the starting point of the line.
-                                path.addLine(to: CGPoint(x: x, y: geometry.size.height)) // Add a line to the specified point.
+                            .stroke(Color.red, lineWidth: 2)
+                            
+                        } else if label == "X Axis Angle" {
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider2Range.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
                             }
-                            .stroke(Color.red, lineWidth: 2) // Set the stroke color and line width.
-                        } else if label == "Z Axis Angle" { // Check if the `label` property is equal to "Z Axis Angle".
-                            Path { path in // Create a path for drawing the line.
-                                let x = CGFloat(valueToPercentage(slider4Range.upperBound, range: range)) * geometry.size.width // Calculate the x-coordinate of the line based on the slider range.
-                                path.move(to: CGPoint(x: x, y: 0)) // Move the starting point of the line.
-                                path.addLine(to: CGPoint(x: x, y: geometry.size.height)) // Add a line to the specified point.
+                            .stroke(Color.green, lineWidth: 2)
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider2Lower.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
                             }
-                            .stroke(Color.red, lineWidth: 2) // Set the stroke color and line width.
-                        } else if label == "Rod Left" { // Check if the `label` property is equal to "Rod Left".
-                           Path { path in // Create a path for drawing the line.
-                               let x = CGFloat(valueToPercentage(slider5Range.upperBound, range: range)) * geometry.size.width // Calculate the x-coordinate of the line based on the slider range.
-                               path.move(to: CGPoint(x: x, y: 0)) // Move the starting point of the line.
-                               path.addLine(to: CGPoint(x: x, y: geometry.size.height)) // Add a line to the specified point.
-                           }
-                           .stroke(Color.red, lineWidth: 2) // Set the stroke color and line width.
+                            .stroke(Color.red, lineWidth: 2)
+                            
+                        } else if label == "Y Axis Angle" {
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider3Range.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                            }
+                            .stroke(Color.green, lineWidth: 2)
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider3Lower.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                            }
+                            .stroke(Color.red, lineWidth: 2)
+                            
+                        } else if label == "Z Axis Angle" {
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider4Range.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                            }
+                            .stroke(Color.green, lineWidth: 2)
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider4Lower.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                            }
+                            .stroke(Color.red, lineWidth: 2)
+                            
+                        } else if label == "Rod Left" {
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider5Range.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                            }
+                            .stroke(Color.green, lineWidth: 2)
+                            Path { path in
+                                let x = CGFloat(valueToPercentage(slider5Lower.upperBound, range: range)) * geometry.size.width
+                                let lineHeight: CGFloat = geometry.size.height / 2
+                                path.move(to: CGPoint(x: x, y: lineHeight))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                            }
+                            .stroke(Color.red, lineWidth: 2)
                        }
                     }
                 }
@@ -85,19 +141,86 @@ struct GaugeView: View {
         .padding()
     }
 }
+
 func valueToPercentage(_ value: Double, range: ClosedRange<Double>) -> Double {
     let clampedValue = min(max(value, range.lowerBound), range.upperBound) // Clamp the value between the lower and upper bounds of the range.
     let normalizedValue = (clampedValue - range.lowerBound) / (range.upperBound - range.lowerBound) // Normalize the clamped value to a percentage between 0 and 1.
     return normalizedValue // Return the normalized value.
 }
-func checkGaugeValue(gaugeValue: [Double], sliderValue: [Double], vibrationType: UINotificationFeedbackGenerator.FeedbackType) {
+
+func checkGaugeValue(gaugeValue: [Double], sliderValue: [Double], sliderLower: [Double], vibrationType: UINotificationFeedbackGenerator.FeedbackType) {
+    // Check the latest value from the gaugeValue array
     if let latestValue = gaugeValue.last {
+        // Iterate through each value in the sliderValue array
         for value in sliderValue {
+            // Compare the latest value from the gauge with the current value from the slider
             if latestValue > value {
+                // Create a UINotificationFeedbackGenerator to provide haptic feedback
                 let feedbackGenerator = UINotificationFeedbackGenerator()
+                // Prepare the feedback generator
                 feedbackGenerator.prepare()
+                // Trigger the notification feedback with the specified vibration type
                 feedbackGenerator.notificationOccurred(vibrationType)
                 break
+            }
+        }
+        for lower in sliderLower {
+            // Compare the latest value from the gauge with the current value from the slider
+            if latestValue < lower {
+                // Create a UINotificationFeedbackGenerator to provide haptic feedback
+                let feedbackGenerator = UINotificationFeedbackGenerator()
+                // Prepare the feedback generator
+                feedbackGenerator.prepare()
+                // Trigger the notification feedback with the specified vibration type
+                feedbackGenerator.notificationOccurred(vibrationType)
+                break
+            }
+        }
+
+    }
+}
+func playToneBasedOnGaugeValue(gaugeValue: [Double], sliderValue: [Double], sliderLower: [Double], toneIdentifier: SystemSoundID) {
+    // Check the latest value from the gaugeValue array
+    if let latestValue = gaugeValue.last {
+        // Create an AVAudioPlayer to play the audio tone
+        
+        // Iterate through each value in the sliderValue array
+        for value in sliderValue {
+            // Compare the latest value from the gauge with the current value from the slider
+            if latestValue > value {
+                // Play the audio tone
+                AudioServicesPlaySystemSound(toneIdentifier)
+                break
+            }
+        }
+        
+        for lower in sliderLower {
+            // Compare the latest value from the gauge with the current value from the slider
+            if latestValue < lower {
+                // Play the audio tone
+                AudioServicesPlaySystemSound(toneIdentifier)
+                break
+            }
+        }
+    }
+}
+
+func playAudioTone(gaugeValue: [Double], sliderValue: [Double], sliderLower: [Double]) {
+    // Check the latest value from the gaugeValue array
+    if let latestValue = gaugeValue.last {
+        // Iterate through each value in the sliderValue array
+        for value in sliderValue {
+            // Compare the latest value from the gauge with the current value from the slider
+            if latestValue > value {
+                // Play the sound
+                guard let soundURL = Bundle.main.url(forResource: "whistle2", withExtension: "mp3") else {
+                    // If the sound file is not found, print an error message and return
+                    print("Error: Sound file not found")
+                    return
+                }
+                
+                let player = AVPlayer(url: soundURL)
+                player.play()
             }
         }
     }
@@ -105,12 +228,11 @@ func checkGaugeValue(gaugeValue: [Double], sliderValue: [Double], vibrationType:
 
 struct GaugeData: Codable {
     var gauge1Values: [Double] // Array to store the values for gauge 1
-    var gauge2Values: [Double] // Array to store the values for gauge 2
-    var gauge3Values: [Double] // Array to store the values for gauge 3
-    var gauge4Values: [Double] // Array to store the values for gauge 4
-    var gauge5Values: [Double] // Array to store the values for gauge 5
+    var gauge2Values: [Double]
+    var gauge3Values: [Double]
+    var gauge4Values: [Double]
+    var gauge5Values: [Double]
 }
-
 
 struct NewProjectView: View {
     
@@ -119,18 +241,21 @@ struct NewProjectView: View {
     @State private var gauge3Values: [Double] = []
     @State private var gauge4Values: [Double] = []
     @State private var gauge5Values: [Double] = []
-    
     @State private var gauge1Range: ClosedRange<Double> = 0...1000 // Range for gauge 1..5 for varying ranges
     @State private var gauge2Range: ClosedRange<Double> = 0...180
     @State private var gauge3Range: ClosedRange<Double> = 0...180
     @State private var gauge4Range: ClosedRange<Double> = 0...180
     @State private var gauge5Range: ClosedRange<Double> = 0...15
-   
     @State private var slider1Range: ClosedRange<Double> = 0...1000 // Range for slider 1..5 varying ranges
     @State private var slider2Range: ClosedRange<Double> = 0...180
     @State private var slider3Range: ClosedRange<Double> = 0...180
     @State private var slider4Range: ClosedRange<Double> = 0...180
     @State private var slider5Range: ClosedRange<Double> = 0...15
+    @State private var slider1Lower: ClosedRange<Double> = 0...1000 // Range for sliderLower 1..5 varying ranges
+    @State private var slider2Lower: ClosedRange<Double> = 0...180
+    @State private var slider3Lower: ClosedRange<Double> = 0...180
+    @State private var slider4Lower: ClosedRange<Double> = 0...180
+    @State private var slider5Lower: ClosedRange<Double> = 0...15
     @State private var bluetoothDataHandler = BluetoothDataHandler()
     @State private var fileName = "" // Name of the file
     @State private var showSaveFileCreation = false // Boolean flag to control whether to show the save file creation view
@@ -165,40 +290,12 @@ struct NewProjectView: View {
             
             // Print success message
             print("Data saved successfully!")
-        } catch {
+        } 
+        catch {
             // Print error message if an error occurs
             print("Error saving data: \(error.localizedDescription)")
         }
     }
-    func playAudioTone(gaugeValues: [Double], sliderValues: [Double]) {
-        // Check if the gauge values exceed the corresponding slider values
-        let latestGaugeValue = gaugeValues.last ?? 0 // Get the latest gauge value
-        
-        for sliderValue in sliderValues {
-            if latestGaugeValue > sliderValue {
-                // Play the sound on a background queue
-                DispatchQueue.global().async {
-                    // Play the sound
-                    guard let soundURL = Bundle.main.url(forResource: "tone", withExtension: "mp3") else {
-                        // If the sound file is not found, print an error message and return
-                        print("Error: Sound file not found")
-                        return
-                    }
-                    
-                    do {
-                        // Create an AVAudioPlayer instance with the sound URL
-                        let player = try AVAudioPlayer(contentsOf: soundURL)
-                        // Play the audio
-                        player.play()
-                    } catch {
-                        // If an error occurs while playing the sound, print the error message
-                        print("Error playing sound: \(error.localizedDescription)")
-                    }
-                }
-            }
-        }
-    }
-    
     
     // Returns the URL of the document directory.
     func getDocumentsDirectory() -> URL {
@@ -210,11 +307,11 @@ struct NewProjectView: View {
             ScrollView {
                 LazyVStack {
                     Spacer()
-                    GaugeView(value: gauge1Values.last ?? 0, label: "Current", range: gauge1Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range)
-                    GaugeView(value: gauge2Values.last ?? 0, label: "X Axis Angle", range: gauge2Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range)
-                    GaugeView(value: gauge3Values.last ?? 0, label: "Y Axis Angle", range: gauge3Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range)
-                    GaugeView(value: gauge4Values.last ?? 0, label: "Z Axis Angle", range: gauge4Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range)
-                    GaugeView(value: gauge5Values.last ?? 0, label: "Rod Left", range: gauge5Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range)
+                    GaugeView(value: gauge1Values.last ?? 0, label: "Current", range: gauge1Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range, slider1Lower: $slider1Lower, slider2Lower: $slider2Lower, slider3Lower: $slider3Lower, slider4Lower: $slider4Lower, slider5Lower: $slider5Lower)
+                    GaugeView(value: gauge2Values.last ?? 0, label: "X Axis Angle", range: gauge2Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range, slider1Lower: $slider1Lower, slider2Lower: $slider2Lower, slider3Lower: $slider3Lower, slider4Lower: $slider4Lower, slider5Lower: $slider5Lower)
+                    GaugeView(value: gauge3Values.last ?? 0, label: "Y Axis Angle", range: gauge3Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range, slider1Lower: $slider1Lower, slider2Lower: $slider2Lower, slider3Lower: $slider3Lower, slider4Lower: $slider4Lower, slider5Lower: $slider5Lower)
+                    GaugeView(value: gauge4Values.last ?? 0, label: "Z Axis Angle", range: gauge4Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range, slider1Lower: $slider1Lower, slider2Lower: $slider2Lower, slider3Lower: $slider3Lower, slider4Lower: $slider4Lower, slider5Lower: $slider5Lower)
+                    GaugeView(value: gauge5Values.last ?? 0, label: "Rod Left", range: gauge5Range, slider1Range: $slider1Range, slider2Range: $slider2Range, slider3Range: $slider3Range, slider4Range: $slider4Range, slider5Range: $slider5Range, slider1Lower: $slider1Lower, slider2Lower: $slider2Lower, slider3Lower: $slider3Lower, slider4Lower: $slider4Lower, slider5Lower: $slider5Lower)
                     Spacer()
                 }
                 .padding(.vertical, 20)
@@ -280,85 +377,112 @@ struct NewProjectView: View {
                     VStack {
                         // Slider for voltage limit
                         Text("Voltage Limit")
-                            .font(.headline)
+                            .foregroundColor(.orange)
+                            .font(.system(size: 24, weight: .bold))
                         
-                        // Display the upper bound of slider1Range with two decimal places in blue
-                        Text("\(String(format: "%.2f", slider1Range.upperBound))")
-                            .foregroundColor(.blue)
+                        // Display the upper and lower bound of slider1Range with two decimal places in orange
+                        Text("Upper Limit: \(String(format: "%.2f", slider1Range.upperBound))")
+                            .foregroundColor(.orange)
+                        Text("Lower Limit: \(String(format: "%.2f", slider1Lower.upperBound))")
+                            .foregroundColor(.orange)
                         
-                        // Slider for adjusting the voltage limit between 0 and 1000 with a step of 1
+                        // Slider for adjusting the voltage upper bound between 0 and 1000 with a step of 1
                         Slider(value: Binding(
                             get: { slider1Range.upperBound },
                             set: { newValue in slider1Range = slider1Range.lowerBound...newValue }
                         ), in: 0...1000, step: 1)
+                        .accentColor(.green)
+                        // Slider for adjusting the voltage lower bound between 0 and 1000 with a step of 1
+                        Slider(value: Binding(
+                            get: { slider1Lower.upperBound },
+                            set: { newValue in slider1Lower = slider1Lower.lowerBound...newValue }
+                        ), in: 0...1000, step: 1)
+                        .accentColor(.red)
                         
-                        // Slider for X Axis range
                         Text("X Axis Range")
-                            .font(.headline)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.orange)
                         
-                        // Display the upper bound of slider2Range with two decimal places in blue
-                        Text("\(String(format: "%.2f", slider2Range.upperBound))")
-                            .foregroundColor(.blue)
+                        Text("Upper Limit: \(String(format: "%.2f", slider2Range.upperBound))")
+                            .foregroundColor(.orange)
+                        Text("Lower Limit: \(String(format: "%.2f", slider2Lower.upperBound))")
+                            .foregroundColor(.orange)
                         
-                        // Slider for adjusting the X-axis range between 0 and 180 with a step of 1
                         Slider(value: Binding(
                             get: { slider2Range.upperBound },
                             set: { newValue in slider2Range = slider2Range.lowerBound...newValue }
                         ), in: 0...180, step: 1)
-                        
-                        // Add sliders and corresponding Text views for other gauges here
-                        
-                        // Text view for Y Axis Range
+                        .accentColor(.green)
+                        Slider(value: Binding(
+                            get: { slider2Lower.upperBound },
+                            set: { newValue in slider2Lower = slider2Lower.lowerBound...newValue }
+                        ), in: 0...180, step: 1)
+                        .accentColor(.red)
+
                         Text("Y Axis Range")
-                            .font(.headline)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.orange)
                         
-                        // Display the upper bound of slider3Range for Y-axis range with two decimal places in blue
-                        Text("\(String(format: "%.2f", slider3Range.upperBound))")
-                            .foregroundColor(.blue)
+                        Text("Upper Limit: \(String(format: "%.2f", slider3Range.upperBound))")
+                            .foregroundColor(.orange)
+                        Text("Lower Limit: \(String(format: "%.2f", slider3Lower.upperBound))")
+                            .foregroundColor(.orange)
                         
-                        // Slider for adjusting the Y-axis range between 0 and 180 with a step of 1
                         Slider(value: Binding(
                             get: { slider3Range.upperBound },
                             set: { newValue in slider3Range = slider3Range.lowerBound...newValue }
                         ), in: 0...180, step: 1)
-                        
-                        // Text view for Z Axis Range
+                        .accentColor(.green)
+                        Slider(value: Binding(
+                            get: { slider3Lower.upperBound },
+                            set: { newValue in slider3Lower = slider3Lower.lowerBound...newValue }
+                        ), in: 0...180, step: 1)
+                        .accentColor(.red)
+
                         Text("Z Axis Range")
-                            .font(.headline)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.orange)
                         
-                        // Display the upper bound of slider4Range for Z-axis range with two decimal places in blue
-                        Text("\(String(format: "%.2f", slider4Range.upperBound))")
-                            .foregroundColor(.blue)
+                        Text("Upper Limit: \(String(format: "%.2f", slider4Range.upperBound))")
+                            .foregroundColor(.orange)
+                        Text("Lower Limit: \(String(format: "%.2f", slider4Lower.upperBound))")
+                            .foregroundColor(.orange)
                         
-                        // Slider for adjusting the Z-axis range between 0 and 180 with a step of 1
                         Slider(value: Binding(
                             get: { slider4Range.upperBound },
                             set: { newValue in slider4Range = slider4Range.lowerBound...newValue }
                         ), in: 0...180, step: 1)
+                        .accentColor(.green)
+                        Slider(value: Binding(
+                            get: { slider4Lower.upperBound },
+                            set: { newValue in slider4Lower = slider4Lower.lowerBound...newValue }
+                        ), in: 0...180, step: 1)
+                        .accentColor(.red)
                         
-                        // Text view for Threshold Range
                         Text("Threshold Range")
-                            .font(.headline)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.orange)
                         
-                        // Display the upper bound of slider5Range for the threshold range with two decimal places in blue
-                        Text("\(String(format: "%.2f", slider5Range.upperBound))")
-                            .foregroundColor(.blue)
+                        Text("Upper Limit: \(String(format: "%.2f", slider5Range.upperBound))")
+                            .foregroundColor(.orange)
+                        Text("Lower Limit: \(String(format: "%.2f", slider5Lower.upperBound))")
+                            .foregroundColor(.orange)
                         
-                        // Slider for adjusting the threshold range between 0 and 15 with a step of 1
                         Slider(value: Binding(
                             get: { slider5Range.upperBound },
                             set: { newValue in slider5Range = slider5Range.lowerBound...newValue }
                         ), in: 0...15, step: 1)
+                        .accentColor(.green)
+                        Slider(value: Binding(
+                            get: { slider5Lower.upperBound },
+                            set: { newValue in slider5Lower = slider5Lower.lowerBound...newValue }
+                        ), in: 0...15, step: 1)
+                        .accentColor(.red)
                     }
-                    
                     .padding()
-                    
                 }
-                
-                
             }
             )
-            
         }
         
         .onReceive(timer) { _ in
@@ -373,12 +497,17 @@ struct NewProjectView: View {
             gauge4Values.append(Double(String(format: "%.2f", Double.random(in: gauge4Range)))!)
             gauge5Values.append(Double(String(format: "%.2f", Double.random(in: gauge5Range)))!)
             
-            // Play an audio tone based on the values from gauge1 and the upper bound of slider1
-            playAudioTone(gaugeValues: gauge1Values, sliderValues: [slider1Range.upperBound])
-            checkGaugeValue(gaugeValue: gauge2Values, sliderValue: [slider2Range.upperBound], vibrationType: .success)
-            checkGaugeValue(gaugeValue: gauge3Values, sliderValue: [slider3Range.upperBound], vibrationType: .warning)
-            checkGaugeValue(gaugeValue: gauge4Values, sliderValue: [slider4Range.upperBound], vibrationType: .error)
-            checkGaugeValue(gaugeValue: gauge5Values, sliderValue: [slider5Range.upperBound], vibrationType: .success)
+            //Calls for feedback to the user checking the most recent guage values
+            //checkGaugeValue(gaugeValue: gauge1Values, sliderValue: [slider1Range.upperBound], sliderLower: [slider1Lower.upperBound], vibrationType: .success)
+            //playToneBasedOnGaugeValue(gaugeValue: gauge1Values, sliderValue: [slider1Range.upperBound], sliderLower: [slider1Lower.upperBound], toneIdentifier: 1016)
+            checkGaugeValue(gaugeValue: gauge2Values, sliderValue: [slider2Range.upperBound], sliderLower: [slider2Lower.upperBound], vibrationType: .success)
+            playToneBasedOnGaugeValue(gaugeValue: gauge2Values, sliderValue: [slider2Range.upperBound], sliderLower: [slider2Lower.upperBound], toneIdentifier: 1057)
+            checkGaugeValue(gaugeValue: gauge3Values, sliderValue: [slider3Range.upperBound], sliderLower: [slider3Lower.upperBound], vibrationType: .warning)
+            playToneBasedOnGaugeValue(gaugeValue: gauge3Values, sliderValue: [slider3Range.upperBound], sliderLower: [slider3Lower.upperBound], toneIdentifier: 1100)
+            checkGaugeValue(gaugeValue: gauge4Values, sliderValue: [slider4Range.upperBound], sliderLower: [slider4Lower.upperBound], vibrationType: .error)
+            playToneBasedOnGaugeValue(gaugeValue: gauge4Values, sliderValue: [slider4Range.upperBound], sliderLower: [slider4Lower.upperBound], toneIdentifier: 1105)
+            checkGaugeValue(gaugeValue: gauge5Values, sliderValue: [slider5Range.upperBound], sliderLower: [slider5Lower.upperBound], vibrationType: .success)
+            playToneBasedOnGaugeValue(gaugeValue: gauge5Values, sliderValue: [slider5Range.upperBound], sliderLower: [slider5Lower.upperBound], toneIdentifier: 1106)
         }
     }
 }

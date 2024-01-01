@@ -26,7 +26,6 @@
 		FADCCE422AF3659400A59CEE /* ChatGPT.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADCCE3D2AF3659300A59CEE /* ChatGPT.swift */; };
 		FADCCE442AF366AA00A59CEE /* DataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADCCE432AF366AA00A59CEE /* DataHandler.swift */; };
 		FADCCE472AF4264D00A59CEE /* SaveFileCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADCCE462AF4264D00A59CEE /* SaveFileCreationView.swift */; };
-		FAE42A822B1B05C700520948 /* tone.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FAE42A812B1B05C700520948 /* tone.mp3 */; };
 		FAE42A842B1C661000520948 /* LineChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE42A832B1C661000520948 /* LineChartView.swift */; };
 		FAE42A872B1C671F00520948 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = FAE42A862B1C671F00520948 /* SwiftUICharts */; };
 		FAF746612B3526B700FFB97B /* BluetoothDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF746602B3526B700FFB97B /* BluetoothDataHandler.swift */; };
@@ -73,7 +72,6 @@
 		FADCCE432AF366AA00A59CEE /* DataHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataHandler.swift; sourceTree = "<group>"; };
 		FADCCE452AF3671C00A59CEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		FADCCE462AF4264D00A59CEE /* SaveFileCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveFileCreationView.swift; sourceTree = "<group>"; };
-		FAE42A812B1B05C700520948 /* tone.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = tone.mp3; path = Assets.xcassets/tone.mp3; sourceTree = "<group>"; };
 		FAE42A832B1C661000520948 /* LineChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineChartView.swift; sourceTree = "<group>"; };
 		FAF746602B3526B700FFB97B /* BluetoothDataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDataHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -143,7 +141,6 @@
 				FADCCE372AF3651E00A59CEE /* SplashView.swift */,
 				FADCCE0A2AF3612900A59CEE /* ContentView.swift */,
 				FADCCE0C2AF3612B00A59CEE /* Assets.xcassets */,
-				FAE42A812B1B05C700520948 /* tone.mp3 */,
 				FADCCE112AF3612B00A59CEE /* Persistence.swift */,
 				FADCCE132AF3612B00A59CEE /* RealTime2.xcdatamodeld */,
 				FADCCE0E2AF3612B00A59CEE /* Preview Content */,
@@ -288,7 +285,6 @@
 			files = (
 				FADCCE102AF3612B00A59CEE /* Preview Assets.xcassets in Resources */,
 				FADCCE0D2AF3612B00A59CEE /* Assets.xcassets in Resources */,
-				FAE42A822B1B05C700520948 /* tone.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
