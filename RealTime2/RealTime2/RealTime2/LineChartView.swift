@@ -14,8 +14,8 @@ struct LineChartView: View {
     
     @State private var savedFiles: [SavedFile] = []
     @State private var selectedFile: SavedFile?
-    @State private var isEditing = false
     @State private var selectedGauge: Int?
+    @State private var isSelected = false
     
     struct SavedFile: Identifiable {
         let id = UUID()
@@ -65,13 +65,14 @@ struct LineChartView: View {
         VStack {
             if savedFiles.isEmpty {
                 Text("No saved files found.")
-            } 
+            }
             else {
                 List(savedFiles) { file in
                     HStack {
                         Button(action: {
                             selectedFile = file
                             loadGaugeData(file: &selectedFile!)
+                            isSelected = true
                         }) {
                             Text(file.name)
                         }
@@ -79,78 +80,82 @@ struct LineChartView: View {
                             selectedFile = file
                             loadGaugeData(file: &selectedFile!)
                         }
-                        .contextMenu {
-                            Button(action: {
-                                isEditing.toggle()
-                            }) {
-                                Text(isEditing ? "Done" : "Edit")
+                        
+                    }
+                }
+                .sheet(isPresented: $isSelected){
+                    if let selectedFile = selectedFile {
+                        if let gaugeData = selectedFile.gaugeData {
+                            ScrollView(.vertical) {
+                                VStack {
+                                    Spacer().frame(height: 15)
+                                    Text(selectedFile.name)
+                                                            .font(.title)
+                                                            .fontWeight(.bold)
+                                                            .foregroundColor(Color.orange)
+                                    Spacer().frame(height: 20)
+                                    HStack {
+
+                                        Button(action: {
+                                            selectedGauge = 0
+                                        }) {
+                                            RectangleButton(color: Color.orange, title: "Voltage")
+                                        }
+                                        Button(action: {
+                                            selectedGauge = 1
+                                        }) {
+                                            RectangleButton(color: Color.orange, title: "X-Axis")
+                                        }
+                                        Button(action: {
+                                            selectedGauge = 2
+                                        }) {
+                                            RectangleButton(color: Color.orange, title: "Y-Axis")
+                                        }
+                                    }
+                                    .padding(.bottom, 20)
+                                    HStack {
+                                        Button(action: {
+                                            selectedGauge = 3
+                                        }) {
+                                            RectangleButton(color: Color.orange, title: "Z-Axis")
+                                        }
+                                        Button(action: {
+                                            selectedGauge = 4
+                                        }) {
+                                            RectangleButton(color: Color.orange, title: "Rod Left")
+                                        }
+                                    }
+                                    if let selectedGauge = selectedGauge {
+                                        switch selectedGauge {
+                                        case 0:
+                                            LineView(data: gaugeData.gauge1Values, title: "Voltage")
+                                                
+                                        case 1:
+                                            LineView(data: gaugeData.gauge2Values, title: "X-Axis")
+                                                
+                                        case 2:
+                                            LineView(data: gaugeData.gauge3Values, title: "Y-Axis")
+                                                
+                                        case 3:
+                                            LineView(data: gaugeData.gauge4Values, title: "Z-Axis")
+                                        case 4:
+                                            LineView(data: gaugeData.gauge5Values, title: "Rod Length")
+                                        default:
+                                            Text("Invalid gauge selected.")
+                                        }
+                                    }
+                                        Spacer()
+                                }
                             }
-                            Button(action: {
-                                deleteFile(at: IndexSet([savedFiles.firstIndex(where: { $0.id == file.id })!]))
-                            }) {
-                                Text("Delete")
-                            }
+                            
+                        } else {
+                            Text("No gauge data found for file \(selectedFile.name).")
                         }
+                    } else {
+                        Text("Select a file to view gauge values.")
                     }
                 }
                 
-                if let selectedFile = selectedFile {
-                    if let gaugeData = selectedFile.gaugeData {
-                        ScrollView(.vertical) {
-                            VStack {
-                                Button(action: {
-                                    selectedGauge = 0
-                                }) {
-                                    Text("Voltage")
-                                }
-                                Button(action: {
-                                    selectedGauge = 1
-                                }) {
-                                    Text("X-Axis")
-                                }
-                                Button(action: {
-                                    selectedGauge = 2
-                                }) {
-                                    Text("Y-Axis")
-                                }
-                                Button(action: {
-                                    selectedGauge = 3
-                                }) {
-                                    Text("Z-Axis")
-                                }
-                                Button(action: {
-                                    selectedGauge = 4
-                                }) {
-                                    Text("Rod Length")
-                                }
-                                
-                                if let selectedGauge = selectedGauge {
-                                    switch selectedGauge {
-                                    case 0:
-                                        LineView(data: gaugeData.gauge1Values, title: "Voltage")
-                                            .overlay(HorizontalLineView(yCoordinate: 120, color: .red))
-                                    case 1:
-                                        LineView(data: gaugeData.gauge2Values, title: "X-Axis")
-                                            .overlay(HorizontalLineView(yCoordinate: 10, color: .red))
-                                    case 2:
-                                        LineView(data: gaugeData.gauge3Values, title: "Y-Axis")
-                                            .overlay(HorizontalLineView(yCoordinate: 45, color: .red))
-                                    case 3:
-                                        LineView(data: gaugeData.gauge4Values, title: "Z-Axis")
-                                    case 4:
-                                        LineView(data: gaugeData.gauge5Values, title: "Rod Length")
-                                    default:
-                                        Text("Invalid gauge selected.")
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        Text("No gauge data found for file \(selectedFile.name).")
-                    }
-                } else {
-                    Text("Select a file to view gauge values.")
-                }
             }
         }
                 .onAppear {
@@ -158,17 +163,3 @@ struct LineChartView: View {
                 }
         }
     }
-struct HorizontalLineView: View {
-    var yCoordinate: CGFloat
-    var color: Color
-    
-    var body: some View {
-        GeometryReader { geometry in
-            Path { path in
-                path.move(to: CGPoint(x: 0, y: yCoordinate))
-                path.addLine(to: CGPoint(x: geometry.size.width, y: yCoordinate))
-            }
-            .stroke(color, lineWidth: 2)
-        }
-    }
-}
