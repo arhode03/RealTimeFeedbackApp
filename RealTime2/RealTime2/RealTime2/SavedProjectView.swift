@@ -153,34 +153,42 @@ struct SavedProjectView: View {
                 if let gaugeData = selectedFile.gaugeData {
                     ScrollView(.vertical) {
                         HStack {
-                            VStack {
-                                Text("Voltage:")
-                                ForEach(gaugeData.gauge1Values, id: \.self) { value in
-                                    Text(String(format: "%.2f", value))
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                VStack {
+                                    Text("Voltage")
+                                    ForEach(0..<gaugeData.gauge1Values.count, id: \.self) { index in
+                                        Text(String(index + 1))
+                                    }
                                 }
-                            }
-                            VStack {
-                                Text("X-Axis:")
-                                ForEach(gaugeData.gauge2Values, id: \.self) { value in
-                                    Text(String(format: "%.2f", value))
+                                VStack {
+                                    Text("Voltage")
+                                    ForEach(gaugeData.gauge1Values, id: \.self) { value in
+                                        Text(String(format: "%.2f", value))
+                                    }
                                 }
-                            }
-                            VStack {
-                                Text("Y Axis:")
-                                ForEach(gaugeData.gauge3Values, id: \.self) { value in
-                                    Text(String(format: "%.2f", value))
+                                VStack {
+                                    Text("X-Axis")
+                                    ForEach(gaugeData.gauge2Values, id: \.self) { value in
+                                        Text(String(format: "%.2f", value))
+                                    }
                                 }
-                            }
-                            VStack {
-                                Text("Z Axis:")
-                                ForEach(gaugeData.gauge4Values, id: \.self) { value in
-                                    Text(String(format: "%.2f", value))
+                                VStack {
+                                    Text("Y Axis")
+                                    ForEach(gaugeData.gauge3Values, id: \.self) { value in
+                                        Text(String(format: "%.2f", value))
+                                    }
                                 }
-                            }
-                            VStack {
-                                Text("Rod Length:")
-                                ForEach(gaugeData.gauge5Values, id: \.self) { value in
-                                    Text(String(format: "%.2f", value))
+                                VStack {
+                                    Text("Z Axis")
+                                    ForEach(gaugeData.gauge4Values, id: \.self) { value in
+                                        Text(String(format: "%.2f", value))
+                                    }
+                                }
+                                VStack {
+                                    Text("Rod Length:")
+                                    ForEach(gaugeData.gauge5Values, id: \.self) { value in
+                                        Text(String(format: "%.2f", value))
+                                    }
                                 }
                             }
                         }
