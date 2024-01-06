@@ -14,16 +14,16 @@ struct GaugeView: View {
     var value: Double
     var label: String
     var range: ClosedRange<Double> // Declare a property `range` of type ClosedRange<Double>.
-    @Binding public var slider1Range: ClosedRange<Double> // Declare a private property `slider1Range` of type Binding<ClosedRange<Double>>.
-    @Binding public var slider2Range: ClosedRange<Double>
-    @Binding public var slider3Range: ClosedRange<Double>
-    @Binding public var slider4Range: ClosedRange<Double>
-    @Binding public var slider5Range: ClosedRange<Double>
-    @Binding public var slider1Lower: ClosedRange<Double> // Declare a private property `slider1Lower` of type Binding<ClosedRange<Double>>.
-    @Binding public var slider2Lower: ClosedRange<Double>
-    @Binding public var slider3Lower: ClosedRange<Double>
-    @Binding public var slider4Lower: ClosedRange<Double>
-    @Binding public var slider5Lower: ClosedRange<Double>
+    @Binding private var slider1Range: ClosedRange<Double> // Declare a private property `slider1Range` of type Binding<ClosedRange<Double>>.
+    @Binding private var slider2Range: ClosedRange<Double>
+    @Binding private var slider3Range: ClosedRange<Double>
+    @Binding private var slider4Range: ClosedRange<Double>
+    @Binding private var slider5Range: ClosedRange<Double>
+    @Binding private var slider1Lower: ClosedRange<Double> // Declare a private property `slider1Lower` of type Binding<ClosedRange<Double>>.
+    @Binding private var slider2Lower: ClosedRange<Double>
+    @Binding private var slider3Lower: ClosedRange<Double>
+    @Binding private var slider4Lower: ClosedRange<Double>
+    @Binding private var slider5Lower: ClosedRange<Double>
     
     init(value: Double, label: String, range: ClosedRange<Double>, slider1Range: Binding<ClosedRange<Double>>, slider2Range: Binding<ClosedRange<Double>>, slider3Range: Binding<ClosedRange<Double>>, slider4Range: Binding<ClosedRange<Double>>, slider5Range: Binding<ClosedRange<Double>>, slider1Lower: Binding<ClosedRange<Double>>, slider2Lower: Binding<ClosedRange<Double>>, slider3Lower: Binding<ClosedRange<Double>>, slider4Lower: Binding<ClosedRange<Double>>, slider5Lower: Binding<ClosedRange<Double>>) {
         self.value = value // Assign the value parameter to the `value` property.
@@ -227,11 +227,23 @@ func playAudioTone(gaugeValue: [Double], sliderValue: [Double], sliderLower: [Do
 }
 
 struct GaugeData: Codable {
-    var gauge1Values: [Double] // Array to store the values for gauge 1
+    var gauge1Values: [Double]
     var gauge2Values: [Double]
     var gauge3Values: [Double]
     var gauge4Values: [Double]
     var gauge5Values: [Double]
+    
+    var slider1Range: ClosedRange<Double>
+    var slider2Range: ClosedRange<Double>
+    var slider3Range: ClosedRange<Double>
+    var slider4Range: ClosedRange<Double>
+    var slider5Range: ClosedRange<Double>
+    
+    var slider1Lower: ClosedRange<Double>
+    var slider2Lower: ClosedRange<Double>
+    var slider3Lower: ClosedRange<Double>
+    var slider4Lower: ClosedRange<Double>
+    var slider5Lower: ClosedRange<Double>
 }
 
 struct NewProjectView: View {
@@ -246,16 +258,16 @@ struct NewProjectView: View {
     @State private var gauge3Range: ClosedRange<Double> = 0...180
     @State private var gauge4Range: ClosedRange<Double> = 0...180
     @State private var gauge5Range: ClosedRange<Double> = 0...15
-    @State public var slider1Range: ClosedRange<Double> = 0...1000 // Range for slider 1..5 varying ranges
-    @State public var slider2Range: ClosedRange<Double> = 0...180
-    @State public var slider3Range: ClosedRange<Double> = 0...180
-    @State public var slider4Range: ClosedRange<Double> = 0...180
-    @State public var slider5Range: ClosedRange<Double> = 0...15
-    @State public var slider1Lower: ClosedRange<Double> = 0...1000 // Range for sliderLower 1..5 varying ranges
-    @State public var slider2Lower: ClosedRange<Double> = 0...180
-    @State public var slider3Lower: ClosedRange<Double> = 0...180
-    @State public var slider4Lower: ClosedRange<Double> = 0...180
-    @State public var slider5Lower: ClosedRange<Double> = 0...15
+    @State private var slider1Range: ClosedRange<Double> = 0...1000 // Range for slider 1..5 varying ranges
+    @State private var slider2Range: ClosedRange<Double> = 0...180
+    @State private var slider3Range: ClosedRange<Double> = 0...180
+    @State private var slider4Range: ClosedRange<Double> = 0...180
+    @State private var slider5Range: ClosedRange<Double> = 0...15
+    @State private var slider1Lower: ClosedRange<Double> = 0...1000 // Range for sliderLower 1..5 varying ranges
+    @State private var slider2Lower: ClosedRange<Double> = 0...180
+    @State private var slider3Lower: ClosedRange<Double> = 0...180
+    @State private var slider4Lower: ClosedRange<Double> = 0...180
+    @State private var slider5Lower: ClosedRange<Double> = 0...15
     @State private var bluetoothDataHandler = BluetoothDataHandler()
     @State private var fileName = "" // Name of the file
     @State private var showSaveFileCreation = false // Boolean flag to control whether to show the save file creation view
@@ -265,18 +277,23 @@ struct NewProjectView: View {
     
     func createSaveFile() {
         // Retrieve the first values from each gauge values array
-        let _ = gauge1Values[0]
-        let _ = gauge2Values[0]
-        let _ = gauge3Values[0]
-        let _ = gauge4Values[0]
-        let _ = gauge5Values[0]
         
         // Create an instance of GaugeData with the gauge values
         let gaugeData = GaugeData(gauge1Values: gauge1Values,
                                   gauge2Values: gauge2Values,
                                   gauge3Values: gauge3Values,
                                   gauge4Values: gauge4Values,
-                                  gauge5Values: gauge5Values)
+                                  gauge5Values: gauge5Values,
+                                  slider1Range: slider1Range,
+                                  slider2Range: slider2Range,
+                                  slider3Range: slider3Range,
+                                  slider4Range: slider4Range,
+                                  slider5Range: slider5Range,
+                                  slider1Lower: slider1Lower,
+                                  slider2Lower: slider2Lower,
+                                  slider3Lower: slider3Lower,
+                                  slider4Lower: slider4Lower,
+                                  slider5Lower: slider5Lower)
         
         do {
             // Encode the gaugeData instance into JSON data

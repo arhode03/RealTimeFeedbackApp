@@ -16,6 +16,7 @@ struct SavedProjectView: View {
     @State private var isEditing = false
     @State private var isSelecting = false
     @State private var isShareSheetPresented = false
+    @State private var isMath = false
     
     struct SavedFile: Identifiable {
         let id = UUID()
@@ -30,6 +31,18 @@ struct SavedProjectView: View {
         var gauge3Values: [Double]
         var gauge4Values: [Double]
         var gauge5Values: [Double]
+        
+        var slider1Range: ClosedRange<Double>
+        var slider2Range: ClosedRange<Double>
+        var slider3Range: ClosedRange<Double>
+        var slider4Range: ClosedRange<Double>
+        var slider5Range: ClosedRange<Double>
+        
+        var slider1Lower: ClosedRange<Double>
+        var slider2Lower: ClosedRange<Double>
+        var slider3Lower: ClosedRange<Double>
+        var slider4Lower: ClosedRange<Double>
+        var slider5Lower: ClosedRange<Double>
     }
     
     func loadSavedFiles() {
@@ -49,6 +62,10 @@ struct SavedProjectView: View {
             // Handle any errors that occur during the file loading process
             print("Error loading saved files: \(error.localizedDescription)")
         }
+    }
+    
+    func isInRange(_ value: Double, lowerBound: Double, upperBound: Double) -> Bool {
+        return value >= lowerBound && value < upperBound
     }
     
     func loadGaugeData(file: inout SavedFile) {
@@ -155,7 +172,7 @@ struct SavedProjectView: View {
                         HStack {
                             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                                 VStack {
-                                    Text("Voltage")
+                                    Text("Time")
                                     ForEach(0..<gaugeData.gauge1Values.count, id: \.self) { index in
                                         Text(String(index + 1))
                                     }
@@ -163,33 +180,123 @@ struct SavedProjectView: View {
                                 VStack {
                                     Text("Voltage")
                                     ForEach(gaugeData.gauge1Values, id: \.self) { value in
-                                        Text(String(format: "%.2f", value))
+                                        Text(String(format: "%.2f", value) + "V")
+                                            .foregroundColor(isInRange(value, lowerBound: gaugeData.slider1Lower.upperBound, upperBound: gaugeData.slider1Range.upperBound) ? .green : .red)
+                                           
                                     }
                                 }
                                 VStack {
                                     Text("X-Axis")
                                     ForEach(gaugeData.gauge2Values, id: \.self) { value in
-                                        Text(String(format: "%.2f", value))
+                                        Text(String(format: "%.2f", value) + "°")
+                                            .foregroundColor(isInRange(value, lowerBound: gaugeData.slider2Lower.upperBound, upperBound: gaugeData.slider2Range.upperBound) ? .green : .red)
                                     }
                                 }
                                 VStack {
                                     Text("Y Axis")
                                     ForEach(gaugeData.gauge3Values, id: \.self) { value in
-                                        Text(String(format: "%.2f", value))
+                                        Text(String(format: "%.2f", value) + "°")
+                                            .foregroundColor(isInRange(value, lowerBound: gaugeData.slider3Lower.upperBound, upperBound: gaugeData.slider3Range.upperBound) ? .green : .red)
                                     }
                                 }
                                 VStack {
                                     Text("Z Axis")
                                     ForEach(gaugeData.gauge4Values, id: \.self) { value in
-                                        Text(String(format: "%.2f", value))
+                                        Text(String(format: "%.2f", value) + "°")
+                                            .foregroundColor(isInRange(value, lowerBound: gaugeData.slider4Lower.upperBound, upperBound: gaugeData.slider4Range.upperBound) ? .green : .red)
                                     }
                                 }
                                 VStack {
-                                    Text("Rod Length:")
+                                    Text("Rod Left:")
                                     ForEach(gaugeData.gauge5Values, id: \.self) { value in
-                                        Text(String(format: "%.2f", value))
+                                        Text(String(format: "%.2f", value) + " in")
+                                            .foregroundColor(isInRange(value, lowerBound: gaugeData.slider5Lower.upperBound, upperBound: gaugeData.slider5Range.upperBound) ? .green : .red)
                                     }
                                 }
+                            }
+                        }
+                        .toolbar {
+                            Button(action: {
+                                isMath.toggle()
+                            }) {
+                                Text("Analytics")
+                            }
+                        }
+                        .sheet(isPresented: $isMath) {
+                            HStack {
+                                VStack {
+                                    Text("Voltage Range")
+                                        .bold()
+                                        .foregroundColor(.orange)
+                                    HStack{
+                                        Text(String(format: "%.0f", gaugeData.slider1Lower.upperBound) + "V")
+                                            .foregroundColor(.green)
+                                        Text("->")
+                                            .foregroundColor(.orange)
+                                        Text(String(format: "%.0f", gaugeData.slider1Range.upperBound) + "V")
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                                .padding()
+                                VStack {
+                                    Text("X-Axis Range")
+                                        .bold()
+                                        .foregroundColor(.orange)
+                                    HStack{
+                                        Text(String(format: "%.0f", gaugeData.slider2Lower.upperBound) + "°")
+                                            .foregroundColor(.green)
+                                        Text("->")
+                                            .foregroundColor(.orange)
+                                        Text(String(format: "%.0f", gaugeData.slider2Range.upperBound) + "°")
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                                .padding()
+                                VStack {
+                                    Text("Y-Axis Range")
+                                        .bold()
+                                        .foregroundColor(.orange)
+                                    HStack{
+                                        Text(String(format: "%.0f", gaugeData.slider3Lower.upperBound) + "°")
+                                            .foregroundColor(.green)
+                                        Text("->")
+                                            .foregroundColor(.orange)
+                                        Text(String(format: "%.0f", gaugeData.slider3Range.upperBound) + "°")
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                                .padding()
+                            }
+                            .padding(.bottom, 2)
+                            HStack {
+                                VStack {
+                                        Text("Z-Axis Range")
+                                        .bold()
+                                        .foregroundColor(.orange)
+                                    HStack{
+                                        Text(String(format: "%.0f", gaugeData.slider4Lower.upperBound) + "°")
+                                            .foregroundColor(.green)
+                                        Text("->")
+                                            .foregroundColor(.orange)
+                                        Text(String(format: "%.0f", gaugeData.slider4Range.upperBound) + "°")
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                                .padding()
+                                VStack {
+                                        Text("Rod Length Buffer")
+                                        .bold()
+                                        .foregroundColor(.orange)
+                                    HStack{
+                                        Text(String(format: "%.0f", gaugeData.slider5Lower.upperBound) + "in")
+                                            .foregroundColor(.green)
+                                        Text("->")
+                                            .foregroundColor(.orange)
+                                        Text(String(format: "%.0f", gaugeData.slider5Range.upperBound) + "in")
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                                .padding()
                             }
                         }
                     }
