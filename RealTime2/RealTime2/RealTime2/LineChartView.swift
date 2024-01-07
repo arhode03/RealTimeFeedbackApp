@@ -30,6 +30,18 @@ struct LineChartView: View {
         var gauge3Values: [Double]
         var gauge4Values: [Double]
         var gauge5Values: [Double]
+        
+        var slider1Range: ClosedRange<Double>
+        var slider2Range: ClosedRange<Double>
+        var slider3Range: ClosedRange<Double>
+        var slider4Range: ClosedRange<Double>
+        var slider5Range: ClosedRange<Double>
+        
+        var slider1Lower: ClosedRange<Double>
+        var slider2Lower: ClosedRange<Double>
+        var slider3Lower: ClosedRange<Double>
+        var slider4Lower: ClosedRange<Double>
+        var slider5Lower: ClosedRange<Double>
     }
     
     func loadSavedFiles() {
@@ -99,7 +111,7 @@ struct LineChartView: View {
                                         Button(action: {
                                             selectedGauge = 0
                                         }) {
-                                            RectangleButton(color: Color.orange, title: "Voltage")
+                                            RectangleButton(color: Color.orange, title: "Current")
                                         }
                                         Button(action: {
                                             selectedGauge = 1
@@ -128,7 +140,7 @@ struct LineChartView: View {
                                     if let selectedGauge = selectedGauge {
                                         switch selectedGauge {
                                         case 0:
-                                            LineView(data: gaugeData.gauge1Values, title: "Voltage")
+                                            LineView(data: gaugeData.gauge1Values, title: "Current")
                                                 
                                         case 1:
                                             LineView(data: gaugeData.gauge2Values, title: "X-Axis")

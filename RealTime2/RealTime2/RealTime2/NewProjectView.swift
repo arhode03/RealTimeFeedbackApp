@@ -504,11 +504,7 @@ struct NewProjectView: View {
         
         .onReceive(timer) { _ in
             // Append random values to arrays for each gauge within their specified ranges
-            if !bluetoothDataHandler.receivedData.isEmpty {
-                // Convert the received data to Double and update the gauge values
-                let newData = bluetoothDataHandler.receivedData.map { Double($0) ?? 0.0 }
-                gauge1Values.append(newData[0])
-            }
+            gauge1Values.append(Double(String(format: "%.2f", Double.random(in: gauge1Range)))!)
             gauge2Values.append(Double(String(format: "%.2f", Double.random(in: gauge2Range)))!)
             gauge3Values.append(Double(String(format: "%.2f", Double.random(in: gauge3Range)))!)
             gauge4Values.append(Double(String(format: "%.2f", Double.random(in: gauge4Range)))!)
