@@ -72,6 +72,8 @@ struct SavedProjectView: View {
         return value >= lowerBound && value < upperBound
     }
     
+ 
+    
     func loadGaugeData(file: inout SavedFile) {
         do {
             // Read the contents of the file at the specified fileURL
@@ -110,6 +112,55 @@ struct SavedProjectView: View {
         let average = sum / Double(values.count)
         
         return average
+    }
+    
+    func countValuesInRange(of values: [Double], lowerBound: Double, upperBound: Double) -> (Int, Int, Int) {
+        var belowCount = 0
+        var withinCount = 0
+        var aboveCount = 0
+        
+        for value in values {
+            if value < lowerBound {
+                belowCount += 1
+            } else if value >= lowerBound && value <= upperBound {
+                withinCount += 1
+            } else {
+                aboveCount += 1
+            }
+        }
+        
+        return (belowCount, withinCount, aboveCount)
+    }
+    
+    func calculateStandardDeviation(of values: [Double]) -> Double? {
+        guard !values.isEmpty else {
+            return nil
+        }
+        
+        guard let average = calculateAverage(of: values) else {
+            return nil
+        }
+        
+        let sumOfSquaredDifferences = values.reduce(0) { result, value in
+            let difference = value - average
+            return result + (difference * difference)
+        }
+        
+        let variance = sumOfSquaredDifferences / Double(values.count)
+        let standardDeviation = sqrt(variance)
+        
+        return standardDeviation
+    }
+    
+    func calculateCoefficientOfVariation(values: [Double]) -> Double? {
+        guard let standardDeviation = calculateStandardDeviation(of: values),
+              let average = calculateAverage(of: values) else {
+            return nil
+        }
+        
+        let coefficientOfVariation = (standardDeviation / average) * 100
+        
+        return coefficientOfVariation
     }
   
     struct ShareSheet: UIViewControllerRepresentable {
@@ -238,16 +289,19 @@ struct SavedProjectView: View {
                             }
                         }
                         .sheet(isPresented: $isMath) {
+                            ScrollView(.vertical){
                             VStack{
                                 Text("Limits")
                                     .font(.title)
                                     .bold()
                                     .foregroundStyle(.orange)
                                     .padding(.bottom, 10)
+                                    .padding(.top, 20)
                                 HStack(spacing: 25) {
                                     VStack {
                                         Text("Current Range")
                                             .bold()
+                                            .underline()
                                             .foregroundColor(.orange)
                                         HStack{
                                             Text(String(format: "%.0f", gaugeData.slider1Lower.upperBound) + "A")
@@ -262,6 +316,7 @@ struct SavedProjectView: View {
                                     VStack {
                                         Text("X-Axis Range")
                                             .bold()
+                                            .underline()
                                             .foregroundColor(.orange)
                                         HStack{
                                             Text(String(format: "%.0f", gaugeData.slider2Lower.upperBound) + "°")
@@ -276,6 +331,7 @@ struct SavedProjectView: View {
                                     VStack {
                                         Text("Y-Axis Range")
                                             .bold()
+                                            .underline()
                                             .foregroundColor(.orange)
                                         HStack{
                                             Text(String(format: "%.0f", gaugeData.slider3Lower.upperBound) + "°")
@@ -292,6 +348,7 @@ struct SavedProjectView: View {
                                 HStack(spacing: 25) {
                                     VStack {
                                         Text("Z-Axis Range")
+                                            .underline()
                                             .bold()
                                             .foregroundColor(.orange)
                                         HStack{
@@ -307,6 +364,7 @@ struct SavedProjectView: View {
                                     VStack {
                                         Text("Rod Length Buffer")
                                             .bold()
+                                            .underline()
                                             .foregroundColor(.orange)
                                         HStack{
                                             Text(String(format: "%.0f", gaugeData.slider5Lower.upperBound) + "in")
@@ -331,8 +389,9 @@ struct SavedProjectView: View {
                                         VStack {
                                             Text("Average Current")
                                                 .bold()
+                                                .underline()
                                                 .foregroundStyle(.orange)
-                                         
+                                            
                                             
                                             if let averageValue1 = calculateAverage(of: gaugeData.gauge1Values) {
                                                 Text(String(format: "%.2f", averageValue1))
@@ -345,6 +404,7 @@ struct SavedProjectView: View {
                                         VStack {
                                             Text("Average X-Axis")
                                                 .bold()
+                                                .underline()
                                                 .foregroundStyle(.orange)
                                             
                                             if let averageValue2 = calculateAverage(of: gaugeData.gauge2Values) {
@@ -357,6 +417,7 @@ struct SavedProjectView: View {
                                         VStack {
                                             Text("Average Y-Axis")
                                                 .bold()
+                                                .underline()
                                                 .foregroundStyle(.orange)
                                             
                                             if let averageValue3 = calculateAverage(of: gaugeData.gauge3Values) {
@@ -367,11 +428,13 @@ struct SavedProjectView: View {
                                             }
                                         }
                                     }
+                                    .padding(.bottom, 20)
                                     HStack(spacing: 20){
                                         VStack {
                                             Text("Average Z-Axis")
                                                 .bold()
                                                 .foregroundStyle(.orange)
+                                                .underline()
                                             
                                             if let averageValue4 = calculateAverage(of: gaugeData.gauge4Values) {
                                                 Text(String(format: "%.2f", averageValue4))
@@ -384,6 +447,7 @@ struct SavedProjectView: View {
                                             Text("Average Rod")
                                                 .bold()
                                                 .foregroundStyle(.orange)
+                                                .underline()
                                             
                                             if let averageValue5 = calculateAverage(of: gaugeData.gauge5Values) {
                                                 Text(String(format: "%.2f", averageValue5))
@@ -393,6 +457,360 @@ struct SavedProjectView: View {
                                             }
                                         }
                                     }
+                                    .padding(.bottom, 30)
+                                    VStack{
+                                        Text("Consistancy")
+                                            .font(.title)
+                                            .bold()
+                                            .foregroundStyle(.orange)
+                                            .padding(.bottom, 10)
+                                        
+                                        HStack(spacing: 20) {
+                                            VStack {
+                                                Text("Current")
+                                                    .bold()
+                                                    .underline()
+                                                    .foregroundStyle(.orange)
+                                                
+                                                if let conValue1 = calculateStandardDeviation(of: gaugeData.gauge1Values) {
+                                                    Text(String(format: "%.2f", conValue1))
+                                                        .foregroundColor(Range2(value: conValue1, lowerBound: 0, upperBound: 1) ? .green : .red)
+                                                } else {
+                                                    Text("No values found")
+                                                }
+                                            }
+                                            VStack {
+                                                Text("X-Axis")
+                                                    .bold()
+                                                    .underline()
+                                                    .foregroundStyle(.orange)
+                                                
+                                                if let conValue2 = calculateStandardDeviation(of: gaugeData.gauge2Values) {
+                                                    Text(String(format: "%.2f", conValue2))
+                                                        .foregroundColor(Range2(value: conValue2, lowerBound: 0, upperBound: 1) ? .green : .red)
+                                                } else {
+                                                    Text("No values found")
+                                                }
+                                            }
+                                            VStack {
+                                                Text("Y-Axis")
+                                                    .bold()
+                                                    .underline()
+                                                    .foregroundStyle(.orange)
+                                                
+                                                if let conValue3 = calculateStandardDeviation(of: gaugeData.gauge3Values) {
+                                                    Text(String(format: "%.2f", conValue3))
+                                                        .foregroundColor(Range2(value: conValue3, lowerBound: 0, upperBound: 1) ? .green : .red)
+                                                } else {
+                                                    Text("No values found")
+                                                }
+                                            }
+                                            
+                                        }
+                                        .padding(.bottom, 20)
+                                        HStack(spacing: 20) {
+                                            VStack {
+                                                Text("Z-Axis")
+                                                    .bold()
+                                                    .underline()
+                                                    .foregroundStyle(.orange)
+                                                
+                                                if let conValue4 = calculateStandardDeviation(of: gaugeData.gauge4Values) {
+                                                    Text(String(format: "%.2f", conValue4))
+                                                        .foregroundColor(Range2(value: conValue4, lowerBound: 0, upperBound: 1) ? .green : .red)
+                                                } else {
+                                                    Text("No values found")
+                                                }
+                                            }
+                                            VStack {
+                                                Text("Rod")
+                                                    .bold()
+                                                    .underline()
+                                                    .foregroundStyle(.orange)
+                                                
+                                                if let conValue5 = calculateStandardDeviation(of: gaugeData.gauge5Values) {
+                                                    Text(String(format: "%.2f", conValue5))
+                                                        .foregroundColor(Range2(value: conValue5, lowerBound: 0, upperBound: 1) ? .green : .red)
+                                                } else {
+                                                    Text("No values found")
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding(.bottom, 20)
+                                    VStack {
+                                        Text("Ranges")
+                                            .font(.title)
+                                            .bold()
+                                            .foregroundStyle(.orange)
+                                            .padding(.bottom, 10)
+                                        
+                                        VStack {
+                                            Text("Current Ranges")
+                                                .font(.system(size: 14))
+                                                .bold()
+                                                .underline()
+                                                .foregroundStyle(.orange)
+                                                .padding(.bottom, 5)
+                                            
+                                            HStack(spacing: 20){
+                                                let result = countValuesInRange(of: gaugeData.gauge1Values, lowerBound: gaugeData.slider1Lower.upperBound, upperBound: gaugeData.slider1Range.upperBound)
+                                                if let firstValue = result.0 as Int? {
+                                                    VStack {
+                                                        Text("Below Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(firstValue))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                }
+                                                if let SecondValue = result.1 as Int? {
+                                                    VStack {
+                                                        Text("In Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(SecondValue))
+                                                            .foregroundStyle(.green)
+                                                    }
+                                                }
+                                                if let thirdValue = result.2 as Int? {
+                                                    VStack {
+                                                        Text("Above Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(thirdValue))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                    
+                                                }
+                                            }
+                                        }
+                                        .padding(.bottom, 10)
+                                        VStack {
+                                            Text("X-Axis Ranges")
+                                                .font(.system(size: 14))
+                                                .bold()
+                                                .underline()
+                                                .foregroundStyle(.orange)
+                                                .padding(.bottom, 5)
+                                            
+                                            HStack(spacing: 20){
+                                                let result1 = countValuesInRange(of: gaugeData.gauge2Values, lowerBound: gaugeData.slider2Lower.upperBound, upperBound: gaugeData.slider2Range.upperBound)
+                                                if let firstValue1 = result1.0 as Int? {
+                                                    VStack {
+                                                        Text("Below Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(firstValue1))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                }
+                                                if let SecondValue1 = result1.1 as Int? {
+                                                    VStack {
+                                                        Text("In Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(SecondValue1))
+                                                            .foregroundStyle(.green)
+                                                    }
+                                                }
+                                                if let thirdValue1 = result1.2 as Int? {
+                                                    VStack {
+                                                        Text("Above Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(thirdValue1))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                    
+                                                }
+                                            }
+                                        }
+                                        .padding(.bottom, 10)
+                                        VStack {
+                                            Text("Y-Axis Ranges")
+                                                .font(.system(size: 14))
+                                                .bold()
+                                                .underline()
+                                                .foregroundStyle(.orange)
+                                                .padding(.bottom, 5)
+                                            
+                                            HStack(spacing: 20){
+                                                let result2 = countValuesInRange(of: gaugeData.gauge3Values, lowerBound: gaugeData.slider3Lower.upperBound, upperBound: gaugeData.slider3Range.upperBound)
+                                                if let firstValue2 = result2.0 as Int? {
+                                                    VStack {
+                                                        Text("Below Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(firstValue2))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                }
+                                                if let SecondValue2 = result2.1 as Int? {
+                                                    VStack {
+                                                        Text("In Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(SecondValue2))
+                                                            .foregroundStyle(.green)
+                                                    }
+                                                }
+                                                if let thirdValue2 = result2.2 as Int? {
+                                                    VStack {
+                                                        Text("Above Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(thirdValue2))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                    
+                                                }
+                                            }
+                                        }
+                                        .padding(.bottom, 10)
+                                        VStack {
+                                            Text("Z-Axis Ranges")
+                                                .font(.system(size: 14))
+                                                .bold()
+                                                .underline()
+                                                .foregroundStyle(.orange)
+                                                .padding(.bottom, 5)
+                                            
+                                            HStack(spacing: 20){
+                                                let result3 = countValuesInRange(of: gaugeData.gauge4Values, lowerBound: gaugeData.slider4Lower.upperBound, upperBound: gaugeData.slider4Range.upperBound)
+                                                if let firstValue3 = result3.0 as Int? {
+                                                    VStack {
+                                                        Text("Below Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(firstValue3))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                }
+                                                if let SecondValue3 = result3.1 as Int? {
+                                                    VStack {
+                                                        Text("In Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(SecondValue3))
+                                                            .foregroundStyle(.green)
+                                                    }
+                                                }
+                                                if let thirdValue3 = result3.2 as Int? {
+                                                    VStack {
+                                                        Text("Above Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(thirdValue3))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                    
+                                                }
+                                            }
+                                        }
+                                        .padding(.bottom, 10)
+                                        VStack {
+                                            Text("Rod Ranges")
+                                                .font(.system(size: 14))
+                                                .bold()
+                                                .underline()
+                                                .foregroundStyle(.orange)
+                                                .padding(.bottom, 5)
+                                            
+                                            HStack(spacing: 20){
+                                                let result4 = countValuesInRange(of: gaugeData.gauge5Values, lowerBound: gaugeData.slider5Lower.upperBound, upperBound: gaugeData.slider5Range.upperBound)
+                                                if let firstValue4 = result4.0 as Int? {
+                                                    VStack {
+                                                        Text("Below Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(firstValue4))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                }
+                                                if let SecondValue4 = result4.1 as Int? {
+                                                    VStack {
+                                                        Text("In Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(SecondValue4))
+                                                            .foregroundStyle(.green)
+                                                    }
+                                                }
+                                                if let thirdValue4 = result4.2 as Int? {
+                                                    VStack {
+                                                        Text("Above Range")
+                                                            .foregroundStyle(.orange)
+                                                        Text(String(thirdValue4))
+                                                            .foregroundStyle(.red)
+                                                    }
+                                                    
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding(.bottom, 30)
+                                VStack {
+                                    Text("Coefficient of Variation")
+                                        .font(.title)
+                                        .bold()
+                                        .foregroundStyle(.orange)
+                                        .padding(.bottom, 10)
+                                    HStack(spacing: 20){
+                                        VStack {
+                                            Text("Current")
+                                                .foregroundStyle(.orange)
+                                                .underline()
+                                                .bold()
+                                            if let varValue1 = calculateCoefficientOfVariation(values: gaugeData.gauge1Values) {
+                                                Text(String(format: "%.2f%%", varValue1))
+                                                    .foregroundColor(Range2(value: varValue1, lowerBound: 0, upperBound: 10) ? .green : .red)
+                                            } else {
+                                                Text("No values found")
+                                            }
+                                        }
+                                        VStack {
+                                            Text("X-Axis")
+                                                .foregroundStyle(.orange)
+                                                .underline()
+                                                .bold()
+                                            if let varValue2 = calculateCoefficientOfVariation(values: gaugeData.gauge2Values) {
+                                                Text(String(format: "%.2f%%", varValue2))
+                                                    .foregroundColor(Range2(value: varValue2, lowerBound: 0, upperBound: 10) ? .green : .red)
+                                            } else {
+                                                Text("No values found")
+                                            }
+                                        }
+                                        VStack {
+                                            Text("Y-Axis")
+                                                .foregroundStyle(.orange)
+                                                .underline()
+                                                .bold()
+                                            if let varValue3 = calculateCoefficientOfVariation(values: gaugeData.gauge3Values) {
+                                                Text(String(format: "%.2f%%", varValue3))
+                                                    .foregroundColor(Range2(value: varValue3, lowerBound: 0, upperBound: 10) ? .green : .red)
+                                            } else {
+                                                Text("No values found")
+                                            }
+                                        }
+                                    }
+                                    .padding(.bottom,  10)
+                                    HStack(spacing: 20) {
+                                        VStack {
+                                            Text("Z-Axis")
+                                                .foregroundStyle(.orange)
+                                                .underline()
+                                                .bold()
+                                            if let varValue4 = calculateCoefficientOfVariation(values: gaugeData.gauge4Values) {
+                                                Text(String(format: "%.2f%%", varValue4))
+                                                    .foregroundColor(Range2(value: varValue4, lowerBound: 0, upperBound: 10) ? .green : .red)
+                                            } else {
+                                                Text("No values found")
+                                            }
+                                        }
+                                        VStack {
+                                            Text("Rod")
+                                                .foregroundStyle(.orange)
+                                                .underline()
+                                                .bold()
+                                            if let varValue5 = calculateCoefficientOfVariation(values: gaugeData.gauge5Values) {
+                                                Text(String(format: "%.2f%%", varValue5))
+                                                    .foregroundColor(Range2(value: varValue5, lowerBound: 0, upperBound: 10) ? .green : .red)
+                                            } else {
+                                                Text("No values found")
+                                            }
+                                        }
+                                    }
+                                    .padding(.bottom, 10)
+                                }
+                                
                                 }
                             }
                         }
