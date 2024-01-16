@@ -51,6 +51,7 @@ struct GaugeView: View {
                     .font(.system(size: 18, design: .rounded))
                     .foregroundColor(.orange)
             }
+            .accentColor(.orange) // Set the accent color of the Gauge view to orange
             .overlay( // Apply an overlay to the Gauge view.
                 GeometryReader { geometry in // Use a GeometryReader to access the view's size and position.
                     ZStack {
@@ -253,6 +254,7 @@ struct NewProjectView: View {
     @State private var gauge3Values: [Double] = []
     @State private var gauge4Values: [Double] = []
     @State private var gauge5Values: [Double] = []
+    @State private var gaugeorder: [Double] = []
     @State private var gauge1Range: ClosedRange<Double> = 0...1000 // Range for gauge 1..5 for varying ranges
     @State private var gauge2Range: ClosedRange<Double> = 0...180
     @State private var gauge3Range: ClosedRange<Double> = 0...180
@@ -274,6 +276,8 @@ struct NewProjectView: View {
     @State private var saveFileName = "" // Name of the file to be saved
     @State private var isShowingSliders = false // Boolean flag to control whether to show the sliders
     @State private var timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect() // Timer that publishes values every 1 second
+    @State private var isStarting = false
+    @State private var isTesting = false
     
     func createSaveFile() {
         // Retrieve the first values from each gauge values array
@@ -320,7 +324,31 @@ struct NewProjectView: View {
     }
     
     var body: some View {
-        NavigationView {
+        HStack {
+               Button(action: {
+                   isTesting.toggle()
+               }) {
+                   Text(isTesting ? "Done" : "Test")
+                       .font(.system(size: 18))
+                       .foregroundColor(.black)
+                       .padding()
+                       .background(Color.orange)
+                       .cornerRadius(10)
+               }
+               .padding(.horizontal)
+               Button(action: {
+                   isStarting.toggle()
+               }) {
+                   Text(isStarting ? "Finish" : "Start")
+                       .font(.system(size: 18))
+                       .foregroundColor(.black)
+                       .padding()
+                       .background(Color.orange)
+                       .cornerRadius(10)
+                   
+               }
+           }
+        .padding(.top, 10)
             ScrollView {
                 LazyVStack {
                     Spacer()
@@ -500,27 +528,76 @@ struct NewProjectView: View {
                 }
             }
             )
-        }
         
-        .onReceive(timer) { _ in
-            // Append random values to arrays for each gauge within their specified ranges
-            gauge1Values.append(Double(String(format: "%.2f", Double.random(in: gauge1Range)))!)
-            gauge2Values.append(Double(String(format: "%.2f", Double.random(in: gauge2Range)))!)
-            gauge3Values.append(Double(String(format: "%.2f", Double.random(in: gauge3Range)))!)
-            gauge4Values.append(Double(String(format: "%.2f", Double.random(in: gauge4Range)))!)
-            gauge5Values.append(Double(String(format: "%.2f", Double.random(in: gauge5Range)))!)
-            
-            //Calls for feedback to the user checking the most recent guage values
-            //checkGaugeValue(gaugeValue: gauge1Values, sliderValue: [slider1Range.upperBound], sliderLower: [slider1Lower.upperBound], vibrationType: .success)
-            //playToneBasedOnGaugeValue(gaugeValue: gauge1Values, sliderValue: [slider1Range.upperBound], sliderLower: [slider1Lower.upperBound], toneIdentifier: 1016)
-            checkGaugeValue(gaugeValue: gauge2Values, sliderValue: [slider2Range.upperBound], sliderLower: [slider2Lower.upperBound], vibrationType: .success)
-            playToneBasedOnGaugeValue(gaugeValue: gauge2Values, sliderValue: [slider2Range.upperBound], sliderLower: [slider2Lower.upperBound], toneIdentifier: 1057)
-            checkGaugeValue(gaugeValue: gauge3Values, sliderValue: [slider3Range.upperBound], sliderLower: [slider3Lower.upperBound], vibrationType: .warning)
-            playToneBasedOnGaugeValue(gaugeValue: gauge3Values, sliderValue: [slider3Range.upperBound], sliderLower: [slider3Lower.upperBound], toneIdentifier: 1100)
-            checkGaugeValue(gaugeValue: gauge4Values, sliderValue: [slider4Range.upperBound], sliderLower: [slider4Lower.upperBound], vibrationType: .error)
-            playToneBasedOnGaugeValue(gaugeValue: gauge4Values, sliderValue: [slider4Range.upperBound], sliderLower: [slider4Lower.upperBound], toneIdentifier: 1105)
-            checkGaugeValue(gaugeValue: gauge5Values, sliderValue: [slider5Range.upperBound], sliderLower: [slider5Lower.upperBound], vibrationType: .success)
-            playToneBasedOnGaugeValue(gaugeValue: gauge5Values, sliderValue: [slider5Range.upperBound], sliderLower: [slider5Lower.upperBound], toneIdentifier: 1106)
+        
+            .onReceive(timer) { _ in
+                if isStarting {
+                    /*
+                    if let lastValueLabel = bluetoothDataHandler.receivedData.last?.label {
+                        if lastValueLabel == "order" {
+                            if let lastValue = bluetoothDataHandler.receivedData.last?.value {
+                                gaugeorder.append(lastValue)
+                            }
+                        } else {
+                            switch gaugeorder.last {
+                            case 0:
+                                if !bluetoothDataHandler.receivedData.isEmpty {
+                                    // Convert the received data to Double and update the gauge values
+                                    let newData = bluetoothDataHandler.receivedData.map { Double($0) ?? 0.0 }
+                                    gauge1Values.append(newData[0])
+                                }
+                            case 1:
+                                if !bluetoothDataHandler.receivedData.isEmpty {
+                                    // Convert the received data to Double and update the gauge values
+                                    let newData = bluetoothDataHandler.receivedData.map { Double($0) ?? 0.0 }
+                                    gauge2Values.append(newData[0])
+                                }
+                            case 2:
+                                if !bluetoothDataHandler.receivedData.isEmpty {
+                                    // Convert the received data to Double and update the gauge values
+                                    let newData = bluetoothDataHandler.receivedData.map { Double($0) ?? 0.0 }
+                                    gauge3Values.append(newData[0])
+                                }
+                            case 3:
+                                if !bluetoothDataHandler.receivedData.isEmpty {
+                                    // Convert the received data to Double and update the gauge values
+                                    let newData = bluetoothDataHandler.receivedData.map { Double($0) ?? 0.0 }
+                                    gauge4Values.append(newData[0])
+                                }
+                            case 4:
+                                if !bluetoothDataHandler.receivedData.isEmpty {
+                                    // Convert the received data to Double and update the gauge values
+                                    let newData = bluetoothDataHandler.receivedData.map { Double($0) ?? 0.0 }
+                                    gauge5Values.append(newData[0])
+                                }
+                            default:
+                                Text("error")
+                            }
+                        }
+                    }
+                    */
+                    // Append random values to arrays for each gauge within their specified ranges
+                    gauge1Values.append(Double(String(format: "%.2f", Double.random(in: gauge1Range)))!)
+                    gauge2Values.append(Double(String(format: "%.2f", Double.random(in: gauge2Range)))!)
+                    gauge3Values.append(Double(String(format: "%.2f", Double.random(in: gauge3Range)))!)
+                    gauge4Values.append(Double(String(format: "%.2f", Double.random(in: gauge4Range)))!)
+                    gauge5Values.append(Double(String(format: "%.2f", Double.random(in: gauge5Range)))!)
+                    
+                    //Calls for feedback to the user checking the most recent guage values
+                    //checkGaugeValue(gaugeValue: gauge1Values, sliderValue: [slider1Range.upperBound], sliderLower: [slider1Lower.upperBound], vibrationType: .success)
+                    //playToneBasedOnGaugeValue(gaugeValue: gauge1Values, sliderValue: [slider1Range.upperBound], sliderLower: [slider1Lower.upperBound], toneIdentifier: 1016)
+                    checkGaugeValue(gaugeValue: gauge2Values, sliderValue: [slider2Range.upperBound], sliderLower: [slider2Lower.upperBound], vibrationType: .success)
+                    playToneBasedOnGaugeValue(gaugeValue: gauge2Values, sliderValue: [slider2Range.upperBound], sliderLower: [slider2Lower.upperBound], toneIdentifier: 1057)
+                    checkGaugeValue(gaugeValue: gauge3Values, sliderValue: [slider3Range.upperBound], sliderLower: [slider3Lower.upperBound], vibrationType: .warning)
+                    playToneBasedOnGaugeValue(gaugeValue: gauge3Values, sliderValue: [slider3Range.upperBound], sliderLower: [slider3Lower.upperBound], toneIdentifier: 1100)
+                    checkGaugeValue(gaugeValue: gauge4Values, sliderValue: [slider4Range.upperBound], sliderLower: [slider4Lower.upperBound], vibrationType: .error)
+                    playToneBasedOnGaugeValue(gaugeValue: gauge4Values, sliderValue: [slider4Range.upperBound], sliderLower: [slider4Lower.upperBound], toneIdentifier: 1105)
+                    checkGaugeValue(gaugeValue: gauge5Values, sliderValue: [slider5Range.upperBound], sliderLower: [slider5Lower.upperBound], vibrationType: .success)
+                    playToneBasedOnGaugeValue(gaugeValue: gauge5Values, sliderValue: [slider5Range.upperBound], sliderLower: [slider5Lower.upperBound], toneIdentifier: 1106)
+                }
+                if isTesting {
+                   
+                }
         }
     }
 }

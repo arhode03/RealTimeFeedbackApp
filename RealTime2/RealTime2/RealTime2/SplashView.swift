@@ -14,11 +14,13 @@ struct SplashView: View {
                 .onAppear {
                     // Simulate a 2-second delay and then transition
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        withAnimation {
+                        withAnimation(.easeOut) { // Add animation modifier with desired animation type
                             showSplash = false
                         }
                     }
                 }
+
         }
+        .foregroundColor(.black)
     }
 }

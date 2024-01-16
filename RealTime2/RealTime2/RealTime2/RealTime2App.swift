@@ -22,7 +22,8 @@ struct RealTime2App: App {
     var body: some Scene {
         WindowGroup {
             if showSplash { // Check if the splash screen should be shown
-                SplashView(showSplash: $showSplash) // Show the SplashView
+                SplashView(showSplash: $showSplash)
+                    .transition(.scale)// Show the SplashView
                     .onAppear {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             // Code to be executed after a delay of 1 second
